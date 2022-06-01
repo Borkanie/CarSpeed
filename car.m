@@ -4,7 +4,6 @@ classdef car
 
     properties
         BB;
-        moved;
         speed=0;
     end
 
@@ -13,28 +12,21 @@ classdef car
             %UNTITLED2 Construct an instance of this class
             %   Detailed explanation goes here
             obj.BB = BB;
-            obj.moved=0;
             obj.speed=0;
         end
-
+        
+        function [isTheSame]=isTheSameCar(obj,car)
+             isTheSame=isPointInBB(getCOG(car.BB),obj.BB);
+        end
+        function [isStillRelevant]=isStillInInteres(obj,interesRectangle)
+             isStillRelevant=isPointInBB(getCOG(obj.BB),interesRectangle);
+        end
         function obj=move(obj,BB)
-            %MOVE
-            %   Detailed explanation goes here
-            cog1=getCOG(BB);
-            sp=sqrt(sum((cog1-getCOG(obj.BB)).^2))/24;
-            if sp<obj.BB(3)/2
-                obj.speed=sp;
-                obj.BB=BB;
-                obj.moved=obj.moved+1;
-            else
-                cog=getCOG(obj.BB);
-                if cog(2)<600
-                    obj.speed=-100;
-                    obj.moved=-100;
-                else
-                    obj.speed=-1;
-                end                
-            end            
+            newcog=getCOG(BB);
+            cog=getCOG(obj.BB);
+            sp=sqrt(sum((newcog-cog).^2))/24;
+            obj.speed=sp;
+            obj.BB=BB;
         end
     end
 end

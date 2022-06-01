@@ -1,36 +1,5 @@
-clc
-clear all
-close all
-
-P1=[600;750]*0.5;
-P2=[600;750]*0.5;
-P3=[680;725]*0.5;
-% Lungime bara
-LungimeBaraPixeli = sqrt(sum([440-760; 800-700].^2));
-
-%% CITIREA VIDEO CLIPULUI/frame-uri
-% implay('trimm.mp4');
-obj=VideoReader('litere1.mp4');
-nFrames=obj.NumFrames;
-vidHeight=obj.Height;
-vidWidth=obj.Width;
-
-isCarInRectangle=false;
-N1=0;
-mov(1:nFrames)=struct('cdata',zeros(vidHeight,vidWidth,1,'uint8'),'colormap',[]);
-for k=1:nFrames
-    frame = read(obj,k);
-    gray_frame=rgb2gray(frame);
-    % gray_frame=imresize(gray_frame,0.5);
-    % gray_frame=rgb2gray(gray_frame);
-    images(:,:,k)=gray_frame;
-    %  images1(:,:,k)=frame;
-    % imshow(gray_frame);
-end
 
 %% diferenta intre frameuri
-%areea of interes where we count car speed in pixels
-interesRectangle=[100 200 200 1000];
 count=0;
 [lini, coloane, Nr_poze] = size (images)
 bbox = [0 0 0 0];
@@ -39,14 +8,13 @@ for i=1:Nr_poze-5
     differenceImage =(abs(im2double(images(:,:,i))) - im2double(images(:,:,i+5)));
     level=graythresh(differenceImage);
     BW1 = im2bw(differenceImage,level);
-    %imshow(differenceImage);
+    imshow(differenceImage);
     SE = strel('disk',3);
     BW2 = imerode(BW1,SE);
     title('IMAGINE DUPA ERODARE');
     BW3 = imdilate(BW2,strel('disk',22));
     info = regionprops(BW3,'Boundingbox','Area') ;
     figure(5)
-    clf();
     imshow(images(:,:,i+2));
     hold on
     N=1750;
@@ -67,10 +35,10 @@ for i=1:Nr_poze-5
             end
             % showShape('line',[380 800 780 660]*0.5,'Color','green')
             for i=1:length(cars)
-                chr=int2str(cars(i).speed*100);
-                text(cars(i).BB(1),cars(i).BB(2),chr,'Color','green','FontSize',10);
+                text(cars.BB(1),cars.BB)
             end
-            hold on
+            text()
+            hold off
             showShape('line',[440 800 760 700]*0.5,'Color','green');
             %disp(count);
         end
