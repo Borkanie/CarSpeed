@@ -1,5 +1,6 @@
 
-%% diferenta intre frameuri
+%areea of interes where we count car speed in pixels
+interesRectangle=[100 200 400 200];
 count=0;
 [lini, coloane, Nr_poze] = size (images)
 bbox = [0 0 0 0];
@@ -8,13 +9,14 @@ for i=1:Nr_poze-5
     differenceImage =(abs(im2double(images(:,:,i))) - im2double(images(:,:,i+5)));
     level=graythresh(differenceImage);
     BW1 = im2bw(differenceImage,level);
-    imshow(differenceImage);
+    %imshow(differenceImage);
     SE = strel('disk',3);
     BW2 = imerode(BW1,SE);
     title('IMAGINE DUPA ERODARE');
     BW3 = imdilate(BW2,strel('disk',22));
     info = regionprops(BW3,'Boundingbox','Area') ;
-    figure(5)
+    fig=figure(5);
+    clf(fig);
     imshow(images(:,:,i+2));
     hold on
     N=1750;
@@ -24,21 +26,22 @@ for i=1:Nr_poze-5
         area=info(k).Area;
         if(BB(2)>1)
             if (area>N)
-                if isPointInBB(getCOG(BB),interesRectangle)
-                    newcar=car(BB);
-                    cars=TryAddCarToCars(cars,newcar,interesRectangle);
-                end
-                cars=tryRemoveCarToCars(cars,interesRectangle);
-
+                newcar=car(BB);
+                cars=TryAddCarToCars(cars,newcar,interesRectangle);                
+                
                 rectangle('Position', [BB(1),BB(2),BB(3),BB(4)],'EdgeColor','r','LineWidth',2) ;
                 % showShape('line',[320 900 580 850]*0.5,'Color','green')
             end
             % showShape('line',[380 800 780 660]*0.5,'Color','green')
-            for i=1:length(cars)
-                text(cars.BB(1),cars.BB)
+            for i=1:length(cars)               
+                if cars(i).isStillInInteres(interesRectangle)
+                    chr=int2str(cars(i).speed*100);
+                    text(cars(i).BB(1),cars(i).BB(2),chr,'Color','green','FontSize',10);
+                end
             end
-            text()
-            hold off
+            hold on
+            rectangle('Position',interesRectangle,'EdgeColor','b','LineWidth',2)
+            hold on
             showShape('line',[440 800 760 700]*0.5,'Color','green');
             %disp(count);
         end
@@ -50,32 +53,27 @@ end
 %la fiecare iteratie verificam iara care sunt cele posibile sa fie noua
 %pozitie a dreptunghiului vechi
 
-function [cars]=TryAddCarToCars(cars,car,interesRectangle)
+function [newcars]=TryAddCarToCars(cars,car,interesRectangle)
+indexToBeRemoved=[];
 for i=1:length(cars)
     if cars(i).isStillInInteres(interesRectangle)
         if cars(i).isTheSameCar(car)
             cars(i)=cars(i).move(car.BB);
-            fprintf('Speed of car %i is %i \n',[i,cars(i).speed]);
+            %fprintf('Speed of car %i is %i \n',[i,cars(i).speed]);
+            newcars=cars;
             return;
         end
+    else
+        indexToBeRemoved=[indexToBeRemoved i];
+        fprintf('Car %i is out of scope \n',i);
     end
 
 end
 cars(length(cars)+1)=car;
 fprintf('Added car %i \n',length(cars));
-end
-
-function [newcars]=tryRemoveCarToCars(cars,interesRectangle)
-indexToBeRemoved=[];
-for i=1:length(cars)
-    if ~cars(i).isStillInInteres(interesRectangle)
-        indexToBeRemoved=[indexToBeRemoved i];
-        fprintf('Car %i is out of scope \n',i);
-    end
-end
 cars(indexToBeRemoved)=[];
 newcars=cars;
-if length(indexToBeRemoved)>1
+if length(indexToBeRemoved)>0
     fprintf('Removed %i cars \n',length(indexToBeRemoved));
 end
 end

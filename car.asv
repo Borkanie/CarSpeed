@@ -5,37 +5,39 @@ classdef car
     properties
         BB;
         speed=0;
+        lastFrame=0;
     end
 
     methods
-        function obj = car(BB)
+        function obj = car(BB,frame)
             %UNTITLED2 Construct an instance of this class
             %   Detailed explanation goes here
             obj.BB = BB;
             obj.speed=0;
+            obj.lastFrame=frame;
         end
         
-        function [isTheSame]=isTheSameCar(obj,BB)
-             isTheSame=isPointInBB(getCOG(BB),obj.BB);
+        function [isTheSame]=isTheSameCar(obj,car)
+            isTheSame=isPointInBB(getCOG(car.BB),obj.BB);
         end
-
-        function obj=move(obj,BB)
-            if isTheSameCar(obj,BB)
-                newcog=getCOG(BB);
-                cog=getCOG(obj.BB);
-                sp=sqrt(sum((newcog-cog).^2))/24;
-               
-                    obj.speed=sp;
-                    obj.BB=BB;
-                else
-                    cog=getCOG(obj.BB);
-                    if cog(2)<600
-                        obj.speed=-100;
-                    else
-                        obj.speed=-1;
-                    end
-                end
-            end                   
+        function [isStillRelevant]=isStillInInteres(obj,interesRectangle,frame)             
+            if obj.lastFrame-frame<50
+                isStillRelevant=isPointInBB(getCOG(obj.BB),interesRectangle);
+            else
+                isStillRelevant=0;
+            end
+        end
+        function obj=move(obj,BB,frame,yRatio,xRatio)
+            FramesMoved=frame-obj.lastFrame;
+            obj.lastFrame=frame;
+            newcog=getCOG(BB);
+            cog=getCOG(obj.BB);
+            pixelDiff=(newcog-cog);
+            meterDiff=[pixelDiff(1)*xRatio;pixerlDiff(2)*yRatio];
+            
+            sp=sqrt(sum(.^2))/24;
+            obj.speed=sp;
+            obj.BB=BB;
         end
     end
 end
