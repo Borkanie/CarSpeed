@@ -1,4 +1,35 @@
+clc
+clear all
+close all
 
+P1=[600;750]*0.5;
+P2=[600;750]*0.5;
+P3=[680;725]*0.5;
+% Lungime bara
+LungimeBaraPixeli = sqrt(sum([440-760; 800-700].^2));
+
+%% CITIREA VIDEO CLIPULUI/frame-uri
+% implay('trimm.mp4');
+obj=VideoReader('litere1.mp4');
+nFrames=obj.NumFrames;
+vidHeight=obj.Height;
+vidWidth=obj.Width;
+
+isCarInRectangle=false;
+N1=0;
+mov(1:nFrames)=struct('cdata',zeros(vidHeight,vidWidth,1,'uint8'),'colormap',[]);
+for k=1:nFrames
+    frame = read(obj,k);
+    gray_frame=rgb2gray(frame);
+    % gray_frame=imresize(gray_frame,0.5);
+    % gray_frame=rgb2gray(gray_frame);
+    images(:,:,k)=gray_frame;
+    %  images1(:,:,k)=frame;
+    % imshow(gray_frame);
+end
+
+
+%% diferenta intre frameuri
 %areea of interes where we count car speed in pixels
 interesRectangle=[100 200 400 200];
 yInteresInMetri=14;
